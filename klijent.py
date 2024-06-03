@@ -7,7 +7,7 @@ import time
 class LetnjaLigaApp:
     def __init__(self,root):
         self.root = root
-        self.root.title("Letnja liga - Turnir u malom fudbalu")
+        self.root.title("Turnir u malom fudbalu")
         self.teams = self.load_teams()
         self.create_main_widgets()
     def load_teams(self):
@@ -168,7 +168,7 @@ class LetnjaLigaApp:
     def show_results(self):
         results_window = tk.Toplevel(self.root)
         results_window.title("Rezultati")
-        results_text = tk.Text(results_window,blockcursor=True)
+        results_text = tk.Text(results_window)
         results_text.pack()
         req = {'action':'get_games'}
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
