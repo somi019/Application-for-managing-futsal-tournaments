@@ -239,9 +239,8 @@ class LetnjaLigaApp:
             log_file.write(f"Timovi:{match_data['tim1']} - {match_data['tim2']}\n")
             log_file.write(f"Rezultat:{match_data['rezultat']}\n")
             log_file.write(f"Golovi:\n")
-            for scorer in self.strelciUtakmice:
-                log_file.write(f"Igrac: {scorer}, broj golova: {self.strelciUtakmice[scorer]}\n")
-
+            scorer_strings = map(lambda scorer: f"Igrac: {scorer}, broj golova: {self.strelciUtakmice[scorer]}\n",self.strelciUtakmice)
+            log_file.writelines(scorer_strings)
 
 
 if __name__ == "__main__":
