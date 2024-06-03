@@ -64,7 +64,7 @@ class LetnjaLigaApp:
         self.team2_score_label = tk.Label(match_window,text="0")
         self.team2_score_label.pack()
 
-        self.goal_button = tk.Button(match_window,width=30,pady=10,text="Gol",command = lambda:self.add_goal(self.team1_players,self.team2_players,self.team1_score_label,self.team2_score_label))
+        self.goal_button = tk.Button(match_window,width=30,pady=10,text="Gol",command = lambda:self.add_goal())
         self.goal_button.pack()
 
         self.end_match_button = tk.Button(match_window,width=30,pady=10,text="Kraj utakmice",command = lambda: self.end_match(match_window))
@@ -75,7 +75,7 @@ class LetnjaLigaApp:
         listbox.delete(0,tk.END)
         for player in self.teams[team]:
             listbox.insert(tk.END,player)
-    def add_goal(self,team1_players,team2_players,team1_score_label,team2_score_label):
+    def add_goal(self):
         selected_team1 = self.team1_players.curselection()
         selected_team2 = self.team2_players.curselection()
 
