@@ -3,6 +3,7 @@ from tkinter import ttk,messagebox
 import json
 import socket
 import time
+import os
 
 class LetnjaLigaApp:
     def __init__(self,root):
@@ -142,6 +143,7 @@ class LetnjaLigaApp:
             }
             self.add_scorers(self.strelciUtakmice)
             self.send_match_data(match_data)
+            self.log_match(match_data)
             match_window.destroy()
 
     def send_match_data(self,match_data):
@@ -222,6 +224,25 @@ class LetnjaLigaApp:
             for game in games:
                 results_text.insert(tk.END,f"Datum : {game[1]}, Vreme : {game[2]}, {game[3]} {game[5]} {game[4]}\n")
         results_text.config(state="disabled")
+
+    def ensure_logs_directory_exists(self):
+        if not os.path.exists('utakmice_logs'):
+            os.makedirs('utakmice_logs')
+    
+    def log_match(self,match_data):
+        self.ensure_logs_directory_exists()
+
+        log_filename = f"utakmice_logs/{match_data['datum']}_{match_data['vreme'].replace(':','.')}_{match_data['tim1']}-{match_data['tim2']}.txt"
+        with open(log_filename,"w") as log_file:
+            log_file.write(f"Datum:{match_data['datum']}\n")
+            log_file.write(f"Vreme:{match_data['vreme']}\n")
+            log_file.write(f"Timovi:{match_data['tim1']} - {match_data['tim2']}\n")
+            log_file.write(f"Rezultat:{match_data['rezultat']}\n")
+            log_file.write(f"Golovi:\n")
+            for scorer in self.strelciUtakmice:
+                log_file.write(f"Igrac: {scorer}, broj golova: {self.strelciUtakmice[scorer]}\n")
+
+
 
 if __name__ == "__main__":
 
