@@ -83,13 +83,11 @@ class LetnjaLigaApp:
             self.team1_score +=1
             self.team1_score_label.config(text=f"{self.team1_score}")
             selected_player = self.team1_players.get(selected_team1)
-            print(f"Igrac {selected_player} je postigao gol za ekipu 1")
             self.add_scorer(selected_player)
         elif selected_team2:
             self.team2_score +=1
             self.team2_score_label.config(text=f"{self.team2_score}")
             selected_player = self.team2_players.get(selected_team2)
-            print(f"Igrac {selected_player} je postigao gol za ekipu 2")
             self.add_scorer(selected_player)
         else:
             messagebox.showerror("Greska","Morate izabrati igraca koji je postigao gol")
