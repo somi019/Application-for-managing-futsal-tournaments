@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk,messagebox
 import json
 import socket
+import time
 
 class LetnjaLigaApp:
     def __init__(self,root):
@@ -14,20 +15,20 @@ class LetnjaLigaApp:
             return json.load(file)
     
     def create_main_widgets(self):
-        self.match_button = tk.Button(self.root,text="Utakmica",command=self.start_match)
-        self.match_button.pack(pady=10)
+        self.match_button = tk.Button(self.root,width=30,pady=10,text="Utakmica",command=self.start_match)
+        self.match_button.pack(pady=20)
 
-        self.add_team_button = tk.Button(self.root,text="Dodaj ekipu", command = self.add_team)
-        self.add_team_button.pack(pady=10)
+        self.add_team_button = tk.Button(self.root,width=30,pady=10,text="Dodaj ekipu", command = self.add_team)
+        self.add_team_button.pack(pady=20)
 
-        self.add_player_button = tk.Button(self.root,text="Dodaj igraca",command = self.add_player)
-        self.add_player_button.pack(pady=10)
+        self.add_player_button = tk.Button(self.root,width=30,pady=10,text="Dodaj igraca",command = self.add_player)
+        self.add_player_button.pack(pady=20)
 
-        self.results_button = tk.Button(self.root,text="Rezulati",command = self.show_results)
-        self.results_button.pack(pady=10)
+        self.results_button = tk.Button(self.root,width=30,pady=10,text="Rezulati",command = self.show_results)
+        self.results_button.pack(pady=20)
 
-        self.exit_button = tk.Button(self.root,text="Izlaz",command = self.root.quit)
-        self.exit_button.pack(pady=10)
+        self.exit_button = tk.Button(self.root,width=30,pady=10,text="Izlaz",command = self.root.quit)
+        self.exit_button.pack(pady=20)
 
     def start_match(self):
         match_window = tk.Toplevel(self.root)
@@ -63,14 +64,10 @@ class LetnjaLigaApp:
         self.team2_score_label = tk.Label(match_window,text="0")
         self.team2_score_label.pack()
 
-        self.goal_team1_button = tk.Button(match_window,text=f"Gol ekipa 1",command = lambda:self.add_goal(self.team1_select,self.team1_players,1))
-        self.goal_team1_button.pack()
+        self.goal_button = tk.Button(match_window,width=30,pady=10,text="Gol",command = lambda:self.add_goal(self.team1_players,self.team2_players,self.team1_score_label,self.team2_score_label))
+        self.goal_button.pack()
 
-        
-        self.goal_team2_button = tk.Button(match_window,text="Gol ekipa 2",command = lambda:self.add_goal(self.team2_select,self.team2_players,2))
-        self.goal_team2_button.pack()
-
-        self.end_match_button = tk.Button(match_window,text="Kraj utakmice",command = lambda: self.end_match(match_window))
+        self.end_match_button = tk.Button(match_window,width=30,pady=10,text="Kraj utakmice",command = lambda: self.end_match(match_window))
         self.end_match_button.pack()
 
     def load_players(self,window,select,listbox):
@@ -78,21 +75,32 @@ class LetnjaLigaApp:
         listbox.delete(0,tk.END)
         for player in self.teams[team]:
             listbox.insert(tk.END,player)
-    def add_goal(self,select,listbox,team):
-        if team == 1:
-            self.team1_score += 1
+    def add_goal(self,team1_players,team2_players,team1_score_label,team2_score_label):
+        selected_team1 = self.team1_players.curselection()
+        selected_team2 = self.team2_players.curselection()
+
+        if selected_team1:
+            self.team1_score +=1
             self.team1_score_label.config(text=f"{self.team1_score}")
-        else:
+            selected_player = self.team1_players.get(selected_team1)
+            print(f"Igrac {selected_player} je postigao gol za ekipu 1")
+        elif selected_team2:
             self.team2_score +=1
             self.team2_score_label.config(text=f"{self.team2_score}")
-        selected_player = listbox.get(listbox.curselection())
-        print(f"Igrac {selected_player} je postigao gol za ekipu {team}")
+            selected_player = self.team2_players.get(selected_team2)
+            print(f"Igrac {selected_player} je postigao gol za ekipu 2")
+        else:
+            messagebox.showerror("Greska","Morate izabrati igraca koji je postigao gol")
+
 
     def end_match(self,match_window):
         if messagebox.askyesno("Kraj utakmice?","Da li ste sigurni?"):
+            current_time = time.strftime("%d.%m.%Y %H:%M:%S")
+            datum = current_time.split(" ")[0]
+            vreme = current_time.split(" ")[1]
             match_data = {
-                "datum" : "2023-06-01",
-                "vreme" : "18:00",
+                "datum" : datum,
+                "vreme" : vreme,
                 "tim1" : self.team1_select.get(),
                 "tim2" : self.team2_select.get(),
                 "rezultat" : f"{self.team1_score} : {self.team2_score}"
@@ -113,7 +121,7 @@ class LetnjaLigaApp:
     def add_team(self):
         add_team_window = tk.Toplevel(self.root)
         add_team_window.title("Dodaj ekipu")
-        add_team_window.geometry("300x600")
+        add_team_window.geometry("300x300")
         
         tk.Label(add_team_window,text="Naziv ekipe: ").pack()
         
@@ -135,7 +143,7 @@ class LetnjaLigaApp:
     def add_player(self):
         add_player_window = tk.Toplevel(self.root)
         add_player_window.title("Dodaj igraca")
-        add_player_window.geometry("300x600")
+        add_player_window.geometry("300x300")
         
         tk.Label(add_player_window,text="Naziv ekipe:").pack()
         team_select = ttk.Combobox(add_player_window,values = list(self.teams.keys()))
@@ -160,7 +168,7 @@ class LetnjaLigaApp:
     def show_results(self):
         results_window = tk.Toplevel(self.root)
         results_window.title("Rezultati")
-        results_text = tk.Text(results_window)
+        results_text = tk.Text(results_window,blockcursor=True)
         results_text.pack()
         req = {'action':'get_games'}
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
@@ -170,6 +178,7 @@ class LetnjaLigaApp:
             games = json.loads(response)
             for game in games:
                 results_text.insert(tk.END,f"Datum : {game[1]}, Vreme : {game[2]}, {game[3]} {game[5]} {game[4]}\n")
+        results_text.config(state="disabled")
 
 if __name__ == "__main__":
     root = tk.Tk()

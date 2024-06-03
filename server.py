@@ -45,7 +45,6 @@ class Server:
             cursor = conn.cursor()
             cursor.execute('INSERT INTO utakmice (datum,vreme,tim1,tim2,rezultat) VALUES (?,?,?,?,?)',(data['datum'],data['vreme'],data['tim1'],data['tim2'],data['rezultat']))
             conn.commit()
-            print(self.get_games(conn))
 
         def get_games(self,conn):
             cursor = conn.cursor()
