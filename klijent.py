@@ -99,7 +99,7 @@ class LetnjaLigaApp:
             self.team2_score +=1
             self.team2_score_label.config(text=f"{self.team2_score}")
             selected_player = self.team2_players.get(selected_team2)
-            
+
             if selected_player in self.strelciUtakmice:
                 self.strelciUtakmice[selected_player] += 1
             else:
@@ -184,19 +184,26 @@ class LetnjaLigaApp:
         tk.Label(add_player_window,text="Naziv ekipe:").pack()
         team_select = ttk.Combobox(add_player_window,values = list(self.teams.keys()))
         team_select.pack()
+
+        team_select.bind("<<ComboboxSelected>>",lambda _:self.load_players(add_player_window,team_select,team_players))
+        team_players = tk.Listbox(add_player_window)
+        team_players.pack()
+
         
         tk.Label(add_player_window,text="Ime i prezime igraca:").pack()
         player_name_entry=tk.Entry(add_player_window)
         player_name_entry.pack()
-        tk.Button(add_player_window,text="Dodaj",command=lambda: self.save_player(add_player_window,team_select,player_name_entry)).pack()
+        tk.Button(add_player_window,text="Dodaj",command=lambda: self.save_player(team_players,team_select,player_name_entry)).pack()
 
 
-    def save_player(self,add_player_window,team_select,player_name_entry):
+    def save_player(self,team_players,team_select,player_name_entry):
         team_name = team_select.get()
         player_name = player_name_entry.get()
         if team_name and player_name:
             self.teams[team_name].append(player_name)
             self.save_teams()
+            team_players.insert(tk.END,player_name)
+            player_name_entry.delete(0,tk.END)
             messagebox.showinfo("Uspeh","Igrac uspesno dodat")
         else:
             messagebox.showerror("Greska","Neispravan naziv ekipe ili ime igraca")
