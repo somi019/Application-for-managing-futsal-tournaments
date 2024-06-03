@@ -57,12 +57,19 @@ class LetnjaLigaApp:
 
         self.team1_score = 0
         self.team2_score = 0
-        
-        self.team1_score_label = tk.Label(match_window,text="0")
-        self.team1_score_label.pack()
 
-        self.team2_score_label = tk.Label(match_window,text="0")
-        self.team2_score_label.pack()
+        score_frame = tk.Frame(match_window)
+        score_frame.pack(pady=10)
+
+        self.team1_score_label = tk.Label(score_frame,text="0",font=("Arial",30))
+        self.team1_score_label.pack(side=tk.LEFT)
+
+        self.colon_label = tk.Label(score_frame,text=":",font=("Arial",30))
+        self.colon_label.pack(side=tk.LEFT)
+
+        self.team2_score_label = tk.Label(score_frame,text="0",font=("Arial",30))
+        self.team2_score_label.pack(side=tk.LEFT)
+        
 
         self.goal_button = tk.Button(match_window,width=30,pady=10,text="Gol",command = lambda:self.add_goal())
         self.goal_button.pack()
@@ -200,6 +207,7 @@ class LetnjaLigaApp:
         results_text.config(state="disabled")
 
 if __name__ == "__main__":
+
     root = tk.Tk()
     root.geometry("300x400")
     app = LetnjaLigaApp(root)
