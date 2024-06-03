@@ -1,1 +1,18 @@
-[{"ime": "Ilke", "brojGolova": 2}, {"ime": "Marika", "brojGolova": 6}, {"ime": "Antara", "brojGolova": 3}, {"ime": "Tomica", "brojGolova": 2}]
+[
+    {
+        "ime": "Antara",
+        "brojGolova": 2
+    },
+    {
+        "ime": "Roki",
+        "brojGolova": 3
+    },
+    {
+        "ime": "Pesterac",
+        "brojGolova": 6
+    },
+    {
+        "ime": "Marika",
+        "brojGolova": 2
+    }
+]

@@ -70,7 +70,7 @@ class LetnjaLigaApp:
         self.team2_score_label = tk.Label(score_frame,text="0",font=("Arial",30))
         self.team2_score_label.pack(side=tk.LEFT)
         
-
+        self.strelciUtakmice = {}
         self.goal_button = tk.Button(match_window,width=30,pady=10,text="Gol",command = lambda:self.add_goal())
         self.goal_button.pack()
 
@@ -90,31 +90,40 @@ class LetnjaLigaApp:
             self.team1_score +=1
             self.team1_score_label.config(text=f"{self.team1_score}")
             selected_player = self.team1_players.get(selected_team1)
-            self.add_scorer(selected_player)
+
+            if selected_player in self.strelciUtakmice:
+                self.strelciUtakmice[selected_player] += 1
+            else:
+                self.strelciUtakmice[selected_player] = 1
         elif selected_team2:
             self.team2_score +=1
             self.team2_score_label.config(text=f"{self.team2_score}")
             selected_player = self.team2_players.get(selected_team2)
-            self.add_scorer(selected_player)
+            
+            if selected_player in self.strelciUtakmice:
+                self.strelciUtakmice[selected_player] += 1
+            else:
+                self.strelciUtakmice[selected_player] = 1
         else:
             messagebox.showerror("Greska","Morate izabrati igraca koji je postigao gol")
-    
-    def add_scorer(self,player):
+
+    def add_scorers(self,match_scorers):
         try:
             with open('strelci.json','r') as file:
                 scorers = json.load(file)
         except FileNotFoundError:
                 scorers = []
             
-        player_found = False
-        for scorer in scorers:
-            if scorer['ime'] == player:
-                scorer['brojGolova']+=1
-                player_found = True
-                break
+        for player in match_scorers:
+            player_found = False
+            for scorer in scorers:
+                if scorer['ime'] == player:
+                    scorer['brojGolova']+=match_scorers[player]
+                    player_found = True
+                    break   
+            if player_found == False:
+                scorers.append({"ime":player,"brojGolova":match_scorers[player]})
         
-        if player_found == False:
-            scorers.append({"ime":player,"brojGolova":1})
         with open("strelci.json",'w') as file:
             json.dump(scorers,file)
 
@@ -131,6 +140,7 @@ class LetnjaLigaApp:
                 "tim2" : self.team2_select.get(),
                 "rezultat" : f"{self.team1_score} : {self.team2_score}"
             }
+            self.add_scorers(self.strelciUtakmice)
             self.send_match_data(match_data)
             match_window.destroy()
 
