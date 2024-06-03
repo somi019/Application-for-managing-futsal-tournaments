@@ -1,2 +1,2 @@
-# fpOdbranaRepo
- Application for managing futsal tournaments
+# Application for managing futsal tournaments
+ 
