@@ -84,13 +84,34 @@ class LetnjaLigaApp:
             self.team1_score_label.config(text=f"{self.team1_score}")
             selected_player = self.team1_players.get(selected_team1)
             print(f"Igrac {selected_player} je postigao gol za ekipu 1")
+            self.add_scorer(selected_player)
         elif selected_team2:
             self.team2_score +=1
             self.team2_score_label.config(text=f"{self.team2_score}")
             selected_player = self.team2_players.get(selected_team2)
             print(f"Igrac {selected_player} je postigao gol za ekipu 2")
+            self.add_scorer(selected_player)
         else:
             messagebox.showerror("Greska","Morate izabrati igraca koji je postigao gol")
+    
+    def add_scorer(self,player):
+        try:
+            with open('strelci.json','r') as file:
+                scorers = json.load(file)
+        except FileNotFoundError:
+                scorers = []
+            
+        player_found = False
+        for scorer in scorers:
+            if scorer['ime'] == player:
+                scorer['brojGolova']+=1
+                player_found = True
+                break
+        
+        if player_found == False:
+            scorers.append({"ime":player,"brojGolova":1})
+        with open("strelci.json",'w') as file:
+            json.dump(scorers,file)
 
 
     def end_match(self,match_window):
