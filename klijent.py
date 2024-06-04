@@ -249,7 +249,7 @@ class LetnjaLigaApp:
             "width": 15
         }
 
-        tk.Button(button_frame, text="Dodaj", command=lambda: self.save_team(add_team_window, team_name_entry), **button_style).grid(row=0, column=0, padx=5)
+        tk.Button(button_frame, text="Dodaj", command=lambda: self.save_team(team_name_entry,teamsList), **button_style).grid(row=0, column=0, padx=5)
         tk.Button(button_frame, text="Obrisi", command=lambda: self.delete_team(teamsList), **button_style).grid(row=0, column=1, padx=5)
 
         teamsList = tk.Listbox(add_team_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=16)
@@ -264,12 +264,16 @@ class LetnjaLigaApp:
             del self.teams[selected_team]
             self.save_teams()
             teamsList.delete(selected_team_index)
+        else:
+            messagebox.showerror("Greska","Niste izabrali tim za brisanje!")
 
-    def save_team(self,add_team_window,team_name_entry):
+    def save_team(self,team_name_entry,teamsList):
         team_name = team_name_entry.get()
         if team_name and team_name not in self.teams:
             self.teams[team_name] = []
             self.save_teams()
+            teamsList.insert(tk.END,team_name)
+            team_name_entry.delete(0,tk.END)
         else:
             messagebox.showerror("Greska","Neispravan naziv ekipe ili ekipa vec postoji")
     
@@ -341,8 +345,6 @@ class LetnjaLigaApp:
         self.center_window(results_window, 600, 700)
         results_window.configure(bg="#34495e")
         
-        label_style = {"bg": "#34495e", "fg": "white", "font": ("Helvetica", 14)}
-
         results_text = tk.Text(results_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 15))
         results_text.pack(padx=10, pady=10, fill="both", expand=True)
 
