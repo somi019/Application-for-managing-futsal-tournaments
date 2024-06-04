@@ -211,7 +211,7 @@ class LetnjaLigaApp:
         player_name_entry=tk.Entry(add_player_window)
         player_name_entry.pack()
         tk.Button(add_player_window,text="Dodaj",command=lambda: self.save_player(team_players,team_select,player_name_entry)).pack()
-
+        tk.Button(add_player_window, text="Obriši ", command= lambda: self.delete_player(team_players,team_select)).pack()
 
     def save_player(self,team_players,team_select,player_name_entry):
         team_name = team_select.get()
@@ -224,6 +224,17 @@ class LetnjaLigaApp:
             messagebox.showinfo("Uspeh","Igrac uspesno dodat")
         else:
             messagebox.showerror("Greska","Neispravan naziv ekipe ili ime igraca")
+
+    def delete_player(self,team_players,team_select):
+        selected_player_index = team_players.curselection()
+        team = team_select.get()
+        if selected_player_index and team:
+            selected_player = team_players.get(selected_player_index)
+            self.teams[team].remove(selected_player)
+            self.save_teams()
+            team_players.delete(selected_player_index)
+        else:
+            messagebox.showerror("Greska","Ne mozete obrisati igraca ako ih nema u timu")
         
     def show_results(self):
         results_window = tk.Toplevel(self.root)
