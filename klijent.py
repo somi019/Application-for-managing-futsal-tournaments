@@ -276,26 +276,42 @@ class LetnjaLigaApp:
         
     def add_player(self):
         add_player_window = tk.Toplevel(self.root)
-        add_player_window.title("Dodaj igraca")
-        add_player_window.geometry("300x300")
+        add_player_window.title("Dodaj igrača")
+        self.center_window(add_player_window, 450, 600)
+        add_player_window.configure(bg="#34495e")
         self.root.withdraw()
         add_player_window.protocol("WM_DELETE_WINDOW", lambda: self.on_window_close(add_player_window))
 
-        
-        tk.Label(add_player_window,text="Naziv ekipe:").pack()
-        team_select = ttk.Combobox(add_player_window,values = list(self.teams.keys()))
-        team_select.pack()
+        label_style = {"bg": "#34495e", "fg": "white", "font": ("Helvetica", 14)}
 
-        team_select.bind("<<ComboboxSelected>>",lambda _:self.load_players(add_player_window,team_select,team_players))
-        team_players = tk.Listbox(add_player_window)
-        team_players.pack()
+        tk.Label(add_player_window, text="Naziv ekipe:", **label_style).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        team_select = ttk.Combobox(add_player_window, values=list(self.teams.keys()))
+        team_select.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        team_select.bind("<<ComboboxSelected>>", lambda _: self.load_players(add_player_window, team_select, team_players))
 
-        
-        tk.Label(add_player_window,text="Ime i prezime igraca:").pack()
-        player_name_entry=tk.Entry(add_player_window)
-        player_name_entry.pack()
-        tk.Button(add_player_window,text="Dodaj",command=lambda: self.save_player(team_players,team_select,player_name_entry)).pack()
-        tk.Button(add_player_window, text="Obriši ", command= lambda: self.delete_player(team_players,team_select)).pack()
+        team_players = tk.Listbox(add_player_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=15)
+        team_players.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="we")
+
+        tk.Label(add_player_window, text="Ime i prezime igrača:", **label_style).grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        player_name_entry = tk.Entry(add_player_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12))
+        player_name_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
+
+        button_frame = tk.Frame(add_player_window, bg="#34495e")
+        button_frame.grid(row=3, column=0, columnspan=2, pady=10)
+
+        button_style = {
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0,
+            "width": 15
+        }
+
+        tk.Button(button_frame, text="Dodaj", command=lambda: self.save_player(team_players, team_select, player_name_entry), **button_style).grid(row=0, column=0, padx=5)
+        tk.Button(button_frame, text="Obriši", command=lambda: self.delete_player(team_players, team_select), **button_style).grid(row=0, column=1, padx=5)
 
     def save_player(self,team_players,team_select,player_name_entry):
         team_name = team_select.get()
@@ -322,18 +338,41 @@ class LetnjaLigaApp:
     def show_results(self):
         results_window = tk.Toplevel(self.root)
         results_window.title("Rezultati")
+        self.center_window(results_window, 600, 700)
+        results_window.configure(bg="#34495e")
+        
+        label_style = {"bg": "#34495e", "fg": "white", "font": ("Helvetica", 14)}
 
-        results_text = tk.Text(results_window)
-        results_text.pack()
-        req = {'action':'get_games'}
-        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-            s.connect(('localhost',8001))
+        results_text = tk.Text(results_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 15))
+        results_text.pack(padx=10, pady=10, fill="both", expand=True)
+
+        req = {'action': 'get_games'}
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect(('localhost', 8001))
             s.sendall(json.dumps(req).encode('utf-8'))
             response = s.recv(4096).decode('utf-8')
             games = json.loads(response)
             for game in games:
-                results_text.insert(tk.END,f"Datum : {game[1]}, Vreme : {game[2]}, {game[3]} {game[5]} {game[4]}\n")
+                results_text.insert(tk.END, f"Datum: {game[1]}, Vreme: {game[2]}, {game[3]} {game[5]} {game[4]}\n")
+
         results_text.config(state="disabled")
+        
+        button_frame = tk.Frame(results_window, bg="#34495e")
+        button_frame.pack(pady=10)
+
+        button_style = {
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0,
+            "width": 15
+        }
+
+        close_button = tk.Button(button_frame, text="Zatvori", command=results_window.destroy, **button_style)
+        close_button.pack()
 
     def ensure_logs_directory_exists(self):
         if not os.path.exists('utakmice_logs'):
