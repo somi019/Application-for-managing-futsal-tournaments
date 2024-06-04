@@ -223,22 +223,39 @@ class LetnjaLigaApp:
     def add_team(self):
         add_team_window = tk.Toplevel(self.root)
         add_team_window.title("Dodaj ekipu")
-        add_team_window.geometry("300x300")
+        self.center_window(add_team_window, 400, 500)
+        add_team_window.configure(bg="#34495e")
         self.root.withdraw()
         add_team_window.protocol("WM_DELETE_WINDOW", lambda: self.on_window_close(add_team_window))
-        
-        tk.Label(add_team_window,text="Naziv ekipe: ").pack()
-        
-        team_name_entry = tk.Entry(add_team_window)
-        team_name_entry.pack()
-        tk.Button(add_team_window,text="Dodaj",command= lambda : self.save_team(add_team_window,team_name_entry)).pack()
 
-        tk.Button(add_team_window,text="Obrisi",command=lambda : self.delete_team(teamsList)).pack()
+        label_style = {"bg": "#34495e", "fg": "white", "font": ("Helvetica", 14)}
 
-        teamsList = tk.Listbox(add_team_window)
+        tk.Label(add_team_window, text="Naziv ekipe:", **label_style).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        team_name_entry = tk.Entry(add_team_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12))
+        team_name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+
+        button_frame = tk.Frame(add_team_window, bg="#34495e")
+        button_frame.grid(row=1, column=0, columnspan=2, pady=10)
+
+        button_style = {
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0,
+            "width": 15
+        }
+
+        tk.Button(button_frame, text="Dodaj", command=lambda: self.save_team(add_team_window, team_name_entry), **button_style).grid(row=0, column=0, padx=5)
+        tk.Button(button_frame, text="Obrisi", command=lambda: self.delete_team(teamsList), **button_style).grid(row=0, column=1, padx=5)
+
+        teamsList = tk.Listbox(add_team_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=16)
+        teamsList.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="we")
         for team in self.teams.keys():
             teamsList.insert(tk.END, team)
-        teamsList.pack()
 
     def delete_team(self,teamsList):
         selected_team_index = teamsList.curselection()
