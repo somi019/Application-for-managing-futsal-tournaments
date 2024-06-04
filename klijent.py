@@ -9,16 +9,22 @@ class LetnjaLigaApp:
     def __init__(self,root):
         self.root = root
         self.teams = self.load_teams()
-        
+        self.center_window(root,400,500)
         self.create_main_widgets()
         
     def load_teams(self):
         with open('timovi.json','r') as file:
             return json.load(file)
+        
+    def center_window(self,window, width, height):
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        window.geometry(f'{width}x{height}+{x}+{y}')
     
     def create_main_widgets(self):
         self.root.title("Letnja Liga - Glavni Meni")
-        self.root.geometry("400x500")
         self.root.configure(bg="#2c3e50")
 
         title_label = tk.Label(self.root, text="Letnja Liga", font=("Helvetica", 24, "bold"), bg="#2c3e50", fg="white")
@@ -55,53 +61,75 @@ class LetnjaLigaApp:
     def start_match(self):
         match_window = tk.Toplevel(self.root)
         match_window.title("Utakmica")
-        match_window.geometry("300x800")
-        
-        self.team1_label = tk.Label(match_window,text="Tim 1")
-        self.team1_label.pack()
-        
-        self.team1_select = ttk.Combobox(match_window,values=list(self.teams.keys()))
-        self.team1_select.pack()
-        self.team1_select.bind("<<ComboboxSelected>>",lambda _:self.load_players(match_window,self.team1_select,self.team1_players))
-        
-        self.team1_players = tk.Listbox(match_window)
-        self.team1_players.pack()
+        self.center_window(match_window,450, 800)
+        match_window.configure(bg="#34495e")
 
-        self.team2_label = tk.Label(match_window,text="Tim 2")
-        self.team2_label.pack()
+        self.root.withdraw()
+        match_window.protocol("WM_DELETE_WINDOW", lambda: self.on_window_close(match_window))
+
+        label_style = {"bg": "#34495e", "fg": "white", "font": ("Helvetica", 14)}
+
+        self.team1_label = tk.Label(match_window, text="Tim 1", **label_style)
+        self.team1_label.grid(row=0, column=0, padx=20, pady=5, sticky='w')
         
-        self.team2_select = ttk.Combobox(match_window,values=list(self.teams.keys()))
-        self.team2_select.pack()
-        self.team2_select.bind("<<ComboboxSelected>>",lambda _:self.load_players(match_window,self.team2_select,self.team2_players))
+        self.team1_select = ttk.Combobox(match_window, values=list(self.teams.keys()))
+        self.team1_select.grid(row=1, column=0, padx=20, pady=5, sticky='w')
+        self.team1_select.bind("<<ComboboxSelected>>", lambda _: self.load_players(match_window, self.team1_select, self.team1_players))
         
-        self.team2_players = tk.Listbox(match_window)
-        self.team2_players.pack()
+        self.team1_players = tk.Listbox(match_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=15)
+        self.team1_players.grid(row=2, column=0, padx=20, pady=5, sticky='w')
+
+        self.team2_label = tk.Label(match_window, text="Tim 2", **label_style)
+        self.team2_label.grid(row=0, column=1, padx=20, pady=5, sticky='e')
+        
+        self.team2_select = ttk.Combobox(match_window, values=list(self.teams.keys()))
+        self.team2_select.grid(row=1, column=1, padx=20, pady=5, sticky='e')
+        self.team2_select.bind("<<ComboboxSelected>>", lambda _: self.load_players(match_window, self.team2_select, self.team2_players))
+        
+        self.team2_players = tk.Listbox(match_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=15)
+        self.team2_players.grid(row=2, column=1, padx=20, pady=5, sticky='e')
 
         self.team1_score = 0
         self.team2_score = 0
 
-        score_frame = tk.Frame(match_window)
-        score_frame.pack(pady=10)
+        score_frame = tk.Frame(match_window, bg="#34495e")
+        score_frame.grid(row=3, column=0, columnspan=2, pady=10)
 
-        self.team1_score_label = tk.Label(score_frame,text="0",font=("Arial",30))
-        self.team1_score_label.pack(side=tk.LEFT)
+        self.team1_score_label = tk.Label(score_frame, text="0", font=("Arial", 30), bg="#34495e", fg="white")
+        self.team1_score_label.pack(side=tk.LEFT, padx=5)
 
-        self.colon_label = tk.Label(score_frame,text=":",font=("Arial",30))
-        self.colon_label.pack(side=tk.LEFT)
+        self.colon_label = tk.Label(score_frame, text=":", font=("Arial", 30), bg="#34495e", fg="white")
+        self.colon_label.pack(side=tk.LEFT, padx=5)
 
-        self.team2_score_label = tk.Label(score_frame,text="0",font=("Arial",30))
-        self.team2_score_label.pack(side=tk.LEFT)
+        self.team2_score_label = tk.Label(score_frame, text="0", font=("Arial", 30), bg="#34495e", fg="white")
+        self.team2_score_label.pack(side=tk.LEFT, padx=5)
         
         self.strelciUtakmice = {}
 
-        self.start_button = tk.Button(match_window, width=30, pady=10, text="Započni utakmicu", command=lambda: self.start_game())
-        self.start_button.pack()
+        button_style = {
+            "width": 30,
+            "pady": 10,
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0
+        }
 
-        self.goal_button = tk.Button(match_window,width=30,pady=10,state="disabled",text="Gol",command = lambda:self.add_goal())
-        self.goal_button.pack()
+        self.start_button = tk.Button(match_window, text="Započni utakmicu", command=lambda: self.start_game(), **button_style)
+        self.start_button.grid(row=4, column=0, columnspan=2, pady=10)
 
-        self.end_match_button = tk.Button(match_window,width=30,pady=10,state="disabled",text="Kraj utakmice",command = lambda: self.end_match(match_window))
-        self.end_match_button.pack()
+        self.goal_button = tk.Button(match_window, text="Gol", state="disabled", command=lambda: self.add_goal(), **button_style)
+        self.goal_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+        self.end_match_button = tk.Button(match_window, text="Kraj utakmice", state="disabled", command=lambda: self.end_match(match_window), **button_style)
+        self.end_match_button.grid(row=6, column=0, columnspan=2, pady=10)
+
+    def on_window_close(self,window):
+        self.root.deiconify()
+        window.destroy()
     
     def start_game(self):
         if self.team1_select.get() and self.team2_select.get():
@@ -180,7 +208,7 @@ class LetnjaLigaApp:
             self.add_scorers(self.strelciUtakmice)
             self.send_match_data(match_data)
             self.log_match(match_data)
-            match_window.destroy()
+            self.on_window_close(match_window)
 
     def send_match_data(self,match_data):
         req = {'action':'add_game','data':match_data}
@@ -196,6 +224,8 @@ class LetnjaLigaApp:
         add_team_window = tk.Toplevel(self.root)
         add_team_window.title("Dodaj ekipu")
         add_team_window.geometry("300x300")
+        self.root.withdraw()
+        add_team_window.protocol("WM_DELETE_WINDOW", lambda: self.on_window_close(add_team_window))
         
         tk.Label(add_team_window,text="Naziv ekipe: ").pack()
         
@@ -231,6 +261,9 @@ class LetnjaLigaApp:
         add_player_window = tk.Toplevel(self.root)
         add_player_window.title("Dodaj igraca")
         add_player_window.geometry("300x300")
+        self.root.withdraw()
+        add_player_window.protocol("WM_DELETE_WINDOW", lambda: self.on_window_close(add_player_window))
+
         
         tk.Label(add_player_window,text="Naziv ekipe:").pack()
         team_select = ttk.Combobox(add_player_window,values = list(self.teams.keys()))
@@ -272,6 +305,7 @@ class LetnjaLigaApp:
     def show_results(self):
         results_window = tk.Toplevel(self.root)
         results_window.title("Rezultati")
+
         results_text = tk.Text(results_window)
         results_text.pack()
         req = {'action':'get_games'}
@@ -305,7 +339,6 @@ class LetnjaLigaApp:
 if __name__ == "__main__":
 
     root = tk.Tk()
-    root.geometry("300x400")
     app = LetnjaLigaApp(root)
     root.mainloop()
 
