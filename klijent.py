@@ -167,6 +167,21 @@ class LetnjaLigaApp:
         team_name_entry.pack()
         tk.Button(add_team_window,text="Dodaj",command= lambda : self.save_team(add_team_window,team_name_entry)).pack()
 
+        tk.Button(add_team_window,text="Obrisi",command=lambda : self.delete_team(teamsList)).pack()
+
+        teamsList = tk.Listbox(add_team_window)
+        for team in self.teams.keys():
+            teamsList.insert(tk.END, team)
+        teamsList.pack()
+
+    def delete_team(self,teamsList):
+        selected_team_index = teamsList.curselection()
+        if selected_team_index:
+            selected_team = teamsList.get(selected_team_index)
+            del self.teams[selected_team]
+            self.save_teams()
+            teamsList.delete(selected_team_index)
+
     def save_team(self,add_team_window,team_name_entry):
         team_name = team_name_entry.get()
         if team_name and team_name not in self.teams:

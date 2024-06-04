@@ -119,9 +119,9 @@ pyrightconfig.json
 utakmice_logs/
 timovi.json
 strelci.json
+liga.db
+
 
 # OS-specific
 .DS_Store
 Thumbs.db
-
-# End of list
