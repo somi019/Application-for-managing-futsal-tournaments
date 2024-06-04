@@ -8,28 +8,49 @@ import os
 class LetnjaLigaApp:
     def __init__(self,root):
         self.root = root
-        self.root.title("Turnir u malom fudbalu")
         self.teams = self.load_teams()
+        
         self.create_main_widgets()
+        
     def load_teams(self):
         with open('timovi.json','r') as file:
             return json.load(file)
     
     def create_main_widgets(self):
-        self.match_button = tk.Button(self.root,width=30,pady=10,text="Utakmica",command=self.start_match)
-        self.match_button.pack(pady=20)
+        self.root.title("Letnja Liga - Glavni Meni")
+        self.root.geometry("400x500")
+        self.root.configure(bg="#2c3e50")
 
-        self.add_team_button = tk.Button(self.root,width=30,pady=10,text="Dodaj ekipu", command = self.add_team)
-        self.add_team_button.pack(pady=20)
+        title_label = tk.Label(self.root, text="Letnja Liga", font=("Helvetica", 24, "bold"), bg="#2c3e50", fg="white")
+        title_label.pack(pady=20)
 
-        self.add_player_button = tk.Button(self.root,width=30,pady=10,text="Dodaj igraca",command = self.add_player)
-        self.add_player_button.pack(pady=20)
+        button_style = {
+            "width": 30,
+            "pady": 10,
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0
+        }
 
-        self.results_button = tk.Button(self.root,width=30,pady=10,text="Rezulati",command = self.show_results)
-        self.results_button.pack(pady=20)
+        self.match_button = tk.Button(self.root, text="Utakmica", command=self.start_match, **button_style)
+        self.match_button.pack(pady=10)
 
-        self.exit_button = tk.Button(self.root,width=30,pady=10,text="Izlaz",command = self.root.quit)
-        self.exit_button.pack(pady=20)
+        self.add_team_button = tk.Button(self.root, text="Dodaj ekipu", command=self.add_team, **button_style)
+        self.add_team_button.pack(pady=10)
+
+        self.add_player_button = tk.Button(self.root, text="Dodaj igrača", command=self.add_player, **button_style)
+        self.add_player_button.pack(pady=10)
+
+        self.results_button = tk.Button(self.root, text="Rezultati", command=self.show_results, **button_style)
+        self.results_button.pack(pady=10)
+
+        self.exit_button = tk.Button(self.root, text="Izlaz", command=self.root.quit, **button_style)
+        self.exit_button.pack(pady=10)
+
 
     def start_match(self):
         match_window = tk.Toplevel(self.root)
@@ -202,8 +223,6 @@ class LetnjaLigaApp:
         if team_name and team_name not in self.teams:
             self.teams[team_name] = []
             self.save_teams()
-            messagebox.showinfo("Uspeh","Tim uspesno dodat!")
-            add_team_window.destroy()
         else:
             messagebox.showerror("Greska","Neispravan naziv ekipe ili ekipa vec postoji")
     
@@ -236,7 +255,6 @@ class LetnjaLigaApp:
             self.save_teams()
             team_players.insert(tk.END,player_name)
             player_name_entry.delete(0,tk.END)
-            messagebox.showinfo("Uspeh","Igrac uspesno dodat")
         else:
             messagebox.showerror("Greska","Neispravan naziv ekipe ili ime igraca")
 
