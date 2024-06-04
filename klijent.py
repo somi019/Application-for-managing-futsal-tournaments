@@ -34,7 +34,7 @@ class LetnjaLigaApp:
     def start_match(self):
         match_window = tk.Toplevel(self.root)
         match_window.title("Utakmica")
-        match_window.geometry("300x600")
+        match_window.geometry("300x800")
         
         self.team1_label = tk.Label(match_window,text="Tim 1")
         self.team1_label.pack()
@@ -72,11 +72,26 @@ class LetnjaLigaApp:
         self.team2_score_label.pack(side=tk.LEFT)
         
         self.strelciUtakmice = {}
-        self.goal_button = tk.Button(match_window,width=30,pady=10,text="Gol",command = lambda:self.add_goal())
+
+        self.start_button = tk.Button(match_window, width=30, pady=10, text="Započni utakmicu", command=lambda: self.start_game())
+        self.start_button.pack()
+
+        self.goal_button = tk.Button(match_window,width=30,pady=10,state="disabled",text="Gol",command = lambda:self.add_goal())
         self.goal_button.pack()
 
-        self.end_match_button = tk.Button(match_window,width=30,pady=10,text="Kraj utakmice",command = lambda: self.end_match(match_window))
+        self.end_match_button = tk.Button(match_window,width=30,pady=10,state="disabled",text="Kraj utakmice",command = lambda: self.end_match(match_window))
         self.end_match_button.pack()
+    
+    def start_game(self):
+        if self.team1_select.get() and self.team2_select.get():
+            self.start_button.config(state=tk.DISABLED)
+            self.goal_button.config(state=tk.NORMAL)
+            self.end_match_button.config(state=tk.NORMAL)
+            self.team1_select.config(state=tk.DISABLED)
+            self.team2_select.config(state=tk.DISABLED)
+        else:
+            messagebox.showerror("Greška", "Morate izabrati oba tima pre početka utakmice.")
+
 
     def load_players(self,window,select,listbox):
         team = select.get()
