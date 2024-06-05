@@ -4,6 +4,7 @@ import json
 import socket
 import time
 import os
+from functools import reduce
 
 class LetnjaLigaApp:
     def __init__(self,root):
@@ -53,6 +54,9 @@ class LetnjaLigaApp:
 
         self.results_button = tk.Button(self.root, text="Rezultati", command=self.show_results, **button_style)
         self.results_button.pack(pady=10)
+
+        self.stats_button = tk.Button(self.root, text="Statistika", command=self.show_stats, **button_style)
+        self.stats_button.pack(pady=20)
 
         self.exit_button = tk.Button(self.root, text="Izlaz", command=self.root.quit, **button_style)
         self.exit_button.pack(pady=10)
@@ -376,6 +380,38 @@ class LetnjaLigaApp:
         close_button = tk.Button(button_frame, text="Zatvori", command=results_window.destroy, **button_style)
         close_button.pack()
 
+    def show_stats(self):
+        stats_window = tk.Toplevel(self.root)
+        stats_window.title("Statistika")
+        self.center_window(stats_window, 400, 300)
+        stats_window.configure(bg="#34495e")
+
+        label_style = {"bg": "#34495e", "fg": "white", "font": ("Helvetica", 14)}
+        tk.Label(stats_window, text="Top 3 strelca:", **label_style).pack(pady=10)
+
+        try:
+            with open('strelci.json', 'r') as file:
+                scorers = json.load(file)
+        except FileNotFoundError:
+            scorers = []
+
+        if not scorers:
+            tk.Label(stats_window, text="Nema podataka o strelcima", **label_style).pack(pady=10)
+            return
+
+        sorted_scorers = sorted(scorers, key=lambda x: x['brojGolova'], reverse=True)
+        top_scorers = list(filter(lambda x: sorted_scorers.index(x) < 3, sorted_scorers))
+
+        for scorer in top_scorers:
+            tk.Label(stats_window, text=f"{scorer['ime']} - {scorer['brojGolova']}", **label_style).pack(pady=5)
+
+        total_goals = reduce(lambda acc, scorer: acc + scorer['brojGolova'], scorers, 0)
+
+        tk.Label(stats_window, text=f"Ukupan broj datih golova na turniru je: {total_goals}", **label_style).pack(pady=10)
+
+        close_button = tk.Button(stats_window, text="Zatvori", command=stats_window.destroy, bg="#1abc9c", fg="white", font=("Helvetica", 12), activebackground="#16a085", activeforeground="white", bd=0, highlightthickness=0, width=15)
+        close_button.pack(pady=10)
+
     def ensure_logs_directory_exists(self):
         if not os.path.exists('utakmice_logs'):
             os.makedirs('utakmice_logs')
@@ -393,16 +429,8 @@ class LetnjaLigaApp:
             scorer_strings = map(lambda scorer: f"Igrac: {scorer}, broj golova: {self.strelciUtakmice[scorer]}\n",self.strelciUtakmice)
             log_file.writelines(scorer_strings)
 
-
 if __name__ == "__main__":
 
     root = tk.Tk()
     app = LetnjaLigaApp(root)
     root.mainloop()
-
-
-        
-        
-
-                
-
