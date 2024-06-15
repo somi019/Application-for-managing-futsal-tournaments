@@ -128,8 +128,12 @@ class LetnjaLigaApp:
         self.goal_button = tk.Button(match_window, text="Gol", state="disabled", command=lambda: self.add_goal(), **button_style)
         self.goal_button.grid(row=5, column=0, columnspan=2, pady=10)
 
+        self.own_goal_var = tk.IntVar()
+        self.own_goal_check = tk.Checkbutton(match_window, text="Autogol", variable=self.own_goal_var, bg="#34495e", fg="white", font=("Helvetica", 14), selectcolor="#1abc9c", activebackground="#34495e", activeforeground="white")
+        self.own_goal_check.grid(row=6, column=0, columnspan=2, pady=10)
+
         self.end_match_button = tk.Button(match_window, text="Kraj utakmice", state="disabled", command=lambda: self.end_match(match_window), **button_style)
-        self.end_match_button.grid(row=6, column=0, columnspan=2, pady=10)
+        self.end_match_button.grid(row=7, column=0, columnspan=2, pady=10)
 
     def on_window_close(self,window):
         self.root.deiconify()
@@ -156,18 +160,29 @@ class LetnjaLigaApp:
         selected_team2 = self.team2_players.curselection()
 
         if selected_team1:
-            self.team1_score +=1
-            self.team1_score_label.config(text=f"{self.team1_score}")
             selected_player = self.team1_players.get(selected_team1)
+
+            if self.own_goal_var.get():
+                self.team2_score += 1
+                self.team2_score_label.config(text=str(self.team2_score))
+                selected_player += " (A)"
+            else:
+                self.team1_score +=1
+                self.team1_score_label.config(text=f"{self.team1_score}")
 
             if selected_player in self.strelciUtakmice:
                 self.strelciUtakmice[selected_player] += 1
             else:
                 self.strelciUtakmice[selected_player] = 1
         elif selected_team2:
-            self.team2_score +=1
-            self.team2_score_label.config(text=f"{self.team2_score}")
             selected_player = self.team2_players.get(selected_team2)
+            if self.own_goal_var.get():
+                self.team1_score += 1
+                self.team1_score_label.config(text=str(self.team1_score))
+                selected_player += " (A)"
+            else:
+                self.team2_score +=1
+                self.team2_score_label.config(text=f"{self.team2_score}")
 
             if selected_player in self.strelciUtakmice:
                 self.strelciUtakmice[selected_player] += 1
