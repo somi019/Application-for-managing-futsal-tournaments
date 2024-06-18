@@ -6,12 +6,14 @@ import time
 import os
 from functools import reduce
 
+
 class LetnjaLigaApp:
     def __init__(self,root):
         self.root = root
         self.teams = self.load_teams()
         self.center_window(root,400,500)
         self.create_main_widgets()
+
         
     def load_teams(self):
         with open('timovi.json','r') as file:
@@ -56,7 +58,7 @@ class LetnjaLigaApp:
         self.results_button.pack(pady=10)
 
         self.stats_button = tk.Button(self.root, text="Statistika", command=self.show_stats, **button_style)
-        self.stats_button.pack(pady=20)
+        self.stats_button.pack(pady=10)
 
         self.exit_button = tk.Button(self.root, text="Izlaz", command=self.root.quit, **button_style)
         self.exit_button.pack(pady=10)
@@ -65,7 +67,7 @@ class LetnjaLigaApp:
     def start_match(self):
         match_window = tk.Toplevel(self.root)
         match_window.title("Utakmica")
-        self.center_window(match_window,450, 800)
+        self.center_window(match_window,450, 850)
         match_window.configure(bg="#34495e")
 
         self.root.withdraw()
@@ -135,6 +137,32 @@ class LetnjaLigaApp:
         self.end_match_button = tk.Button(match_window, text="Kraj utakmice", state="disabled", command=lambda: self.end_match(match_window), **button_style)
         self.end_match_button.grid(row=7, column=0, columnspan=2, pady=10)
 
+        timer_frame = tk.Frame(match_window, bg="#34495e")
+        timer_frame.grid(row=8, column=0, columnspan=2, pady=10)
+
+        timer_button_style = {
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0,
+            "width": 8
+        }
+
+        self.start_timer_button = tk.Button(timer_frame, text="Start", command=self.start_timer,state="disabled", **timer_button_style)
+        self.start_timer_button.pack(side=tk.LEFT, padx=(20, 10), pady=10)
+
+        self.pause_timer_button = tk.Button(timer_frame, text="Pause", command=self.pause_timer,state="disabled", **timer_button_style)
+        self.pause_timer_button.pack(side=tk.LEFT, padx=(10, 10), pady=10)
+
+        self.set_time_button = tk.Button(timer_frame, text="Set time", command=self.set_time,state="disabled", **timer_button_style)
+        self.set_time_button.pack(side=tk.LEFT, padx=(10, 20), pady=10)
+
+        self.timer_label_on_match_window = tk.Label(match_window,text="00:00", bg="#34495e", fg="white", font=("Arial", 50, "bold"))
+        self.timer_label_on_match_window.grid(row=9, column=0, columnspan=2, pady=5)
+
     def on_window_close(self,window):
         self.root.deiconify()
         window.destroy()
@@ -146,6 +174,61 @@ class LetnjaLigaApp:
             self.end_match_button.config(state=tk.NORMAL)
             self.team1_select.config(state=tk.DISABLED)
             self.team2_select.config(state=tk.DISABLED)
+            self.start_timer_button.config(state=tk.NORMAL)
+            self.pause_timer_button.config(state=tk.NORMAL)
+            self.set_time_button.config(state=tk.NORMAL)
+            
+            self.time_left = tk.IntVar()
+            self.time_left.set(0)
+            self.full_screen = False
+
+            self.timer_window = tk.Toplevel(self.root)
+            self.timer_window.title("Timer i Rezultat")
+            self.center_window(self.timer_window, 1920, 1080)  # Prilagodite dimenzije prozora prema potrebi
+            self.timer_window.configure(bg="#34495e")
+
+            label_font = ("Arial Greek", 250, "bold")
+
+            # Frame za sve elemente
+            main_frame = tk.Frame(self.timer_window, bg="#34495e")
+            main_frame.pack(expand=True, fill=tk.BOTH)
+
+            # Vreme
+            self.timer_label = tk.Label(main_frame, text="00:00", bg="#34495e", fg="white", font=label_font)
+            self.timer_label.pack(pady=(30, 0))
+
+            # Red za ime timova i rezultate
+            team_result_frame = tk.Frame(main_frame, bg="#34495e")
+            team_result_frame.pack()
+
+            # Ime tima 1
+            self.team1_name_label = tk.Label(team_result_frame, text=self.team1_select.get(), bg="#34495e", fg="white", font=("Arial", 80, "bold"))
+            self.team1_name_label.grid(row=0, column=0, padx=50, pady=(20, 10))
+
+            # Ime tima 2
+            self.team2_name_label = tk.Label(team_result_frame, text=self.team2_select.get(), bg="#34495e", fg="white", font=("Arial", 80, "bold"))
+            self.team2_name_label.grid(row=0, column=1, padx=50, pady=(20, 10))
+
+            # Razmak između imena i rezultata
+            spacer_label = tk.Label(team_result_frame, text="", bg="#34495e")
+            spacer_label.grid(row=1, column=0, columnspan=2)
+
+            # Rezultati
+            result_frame = tk.Frame(team_result_frame, bg="#34495e", bd=10, relief=tk.RIDGE)
+            result_frame.grid(row=2, column=0, columnspan=2, pady=(10, 0))
+
+            self.team1_result_label = tk.Label(result_frame, text="0", bg="#34495e", fg="white", font=label_font)
+            self.team1_result_label.pack(side=tk.LEFT, padx=50)
+
+            self.result_colon_label = tk.Label(result_frame, text=":", bg="#34495e", fg="white", font=label_font)
+            self.result_colon_label.pack(side=tk.LEFT)
+
+            self.team2_result_label = tk.Label(result_frame, text="0", bg="#34495e", fg="white", font=label_font)
+            self.team2_result_label.pack(side=tk.LEFT, padx=50)
+
+            self.timer_window.bind("<F12>",self.toggle_full_screen)
+
+
         else:
             messagebox.showerror("Greška", "Morate izabrati oba tima pre početka utakmice.")
 
@@ -165,24 +248,31 @@ class LetnjaLigaApp:
             if self.own_goal_var.get():
                 self.team2_score += 1
                 self.team2_score_label.config(text=str(self.team2_score))
+                self.team2_result_label.config(text=str(self.team2_score))
+                self.own_goal_check.deselect()
                 selected_player += " (A)"
             else:
                 self.team1_score +=1
                 self.team1_score_label.config(text=f"{self.team1_score}")
+                self.team1_result_label.config(text=str(self.team1_score))
+
 
             if selected_player in self.strelciUtakmice:
                 self.strelciUtakmice[selected_player] += 1
             else:
                 self.strelciUtakmice[selected_player] = 1
+
         elif selected_team2:
             selected_player = self.team2_players.get(selected_team2)
             if self.own_goal_var.get():
                 self.team1_score += 1
                 self.team1_score_label.config(text=str(self.team1_score))
+                self.team1_result_label.config(text=str(self.team1_score))
                 selected_player += " (A)"
             else:
                 self.team2_score +=1
                 self.team2_score_label.config(text=f"{self.team2_score}")
+                self.team2_result_label.config(text=str(self.team2_score))
 
             if selected_player in self.strelciUtakmice:
                 self.strelciUtakmice[selected_player] += 1
@@ -228,6 +318,7 @@ class LetnjaLigaApp:
             self.send_match_data(match_data)
             self.log_match(match_data)
             self.on_window_close(match_window)
+            self.on_window_close(self.timer_window)
 
     def send_match_data(self,match_data):
         req = {'action':'add_game','data':match_data}
@@ -443,6 +534,72 @@ class LetnjaLigaApp:
             log_file.write(f"Golovi:\n")
             scorer_strings = map(lambda scorer: f"Igrac: {scorer}, broj golova: {self.strelciUtakmice[scorer]}\n",self.strelciUtakmice)
             log_file.writelines(scorer_strings)
+
+
+    def start_timer(self):
+        if not hasattr(self, 'timer_running'):
+            self.timer_running = False
+        if not self.timer_running:
+            self.timer_running = True
+            self.update_timer()
+
+    def pause_timer(self):
+        self.timer_running = False
+
+    def set_time(self):
+        self.time_input_window = tk.Toplevel(self.root)
+        self.time_input_window.title("Set Time")
+        self.center_window(self.time_input_window, 300, 200)
+        self.time_input_window.configure(bg="#34495e")
+
+        tk.Label(self.time_input_window, text="Minuti:", bg="#34495e", fg="white", font=("Helvetica", 12)).pack(pady=5)
+        self.minutes_entry = tk.Entry(self.time_input_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12))
+        self.minutes_entry.pack(pady=5)
+        tk.Label(self.time_input_window, text="Sekunde:", bg="#34495e", fg="white", font=("Helvetica", 12)).pack(pady=5)
+        self.seconds_entry = tk.Entry(self.time_input_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12))
+        self.seconds_entry.pack(pady=5)
+        self.seconds_entry.insert(0,"0")
+        button_style = {
+            "width": 30,
+            "pady": 10,
+            "font": ("Helvetica", 12),
+            "bg": "#1abc9c",
+            "fg": "white",
+            "activebackground": "#16a085",
+            "activeforeground": "white",
+            "bd": 0,
+            "highlightthickness": 0
+        }
+
+        tk.Button(self.time_input_window, text="Postavi", command=self.apply_set_time, **button_style).pack(pady=5)
+
+    def apply_set_time(self):
+        minutes = int(self.minutes_entry.get())
+        seconds = int(self.seconds_entry.get())
+        self.time_left.set(minutes * 60 + seconds)
+        self.update_timer_label()
+        self.time_input_window.destroy()
+
+    def update_timer(self):
+        if self.timer_running and self.time_left.get() > 0:
+            self.update_timer_label()
+            self.time_left.set(self.time_left.get() - 1)
+            self.timer_window.after(1000, self.update_timer)
+        elif self.time_left.get() == 0:
+            self.timer_running = False
+            self.timer_label.config(text="00:00")
+            self.timer_label_on_match_window.config(text="00:00")
+
+    def update_timer_label(self):
+        minutes, seconds = divmod(self.time_left.get(), 60)
+        self.timer_label.config(text=f"{minutes:02}:{seconds:02}")
+        self.timer_label_on_match_window.config(text=f"{minutes:02}:{seconds:02}")
+
+    def toggle_full_screen(self,event=None):
+        self.full_screen = not self.full_screen
+
+        self.timer_window.attributes("-fullscreen",self.full_screen)
+        return "break"
 
 if __name__ == "__main__":
 

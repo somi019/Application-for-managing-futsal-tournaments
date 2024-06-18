@@ -1,1 +1,7 @@
-{"Dzokeri": ["Marika", "Kovacevic", "Fica"], "Mini-coop": ["Pesterac", "Roki", "Jane", "Gonza"], "Ilketovci": ["Ilke", "Mare", "Antara"], "Veterani": ["Tomica", "Tasic", "Djura Panic"], "Real": ["Kaka", "Ronaldo"]}
+{
+  "Dzokeri": ["Marika", "Kovacevic", "Fica"],
+  "Mini-coop": ["Pesterac", "Roki", "Jane", "Savkov", "Guja"],
+  "Ilketovci": ["Ilke", "Mare", "Antara"],
+  "Veterani": ["Tomica", "Tasic", "Djura Panic"],
+  "Barsa": []
+}
