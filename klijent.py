@@ -23,7 +23,7 @@ class LetnjaLigaApp:
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
         x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2) - 50
+        y = (screen_height // 2) - (height // 2) - 30
         window.geometry(f'{width}x{height}+{x}+{y}')
     
     def create_main_widgets(self):
@@ -66,7 +66,7 @@ class LetnjaLigaApp:
     def match(self):
         match_window = tk.Toplevel(self.root)
         match_window.title("Utakmica")
-        self.center_window(match_window, 450, 920)
+        self.center_window(match_window, 450, 1000)
         match_window.configure(bg="#34495e")
 
         self.root.withdraw()
@@ -133,7 +133,7 @@ class LetnjaLigaApp:
         self.own_goal_check = tk.Checkbutton(match_window, text="Autogol", variable=self.own_goal_var, bg="#34495e", fg="white", font=("Helvetica", 14), selectcolor="#1abc9c", activebackground="#34495e", activeforeground="white")
         self.own_goal_check.grid(row=6, column=0, columnspan=2, pady=10)
 
-        timer_button_style = {
+        small_button_style = {
             "font": ("Helvetica", 12),
             "bg": "#1abc9c",
             "fg": "white",
@@ -148,13 +148,13 @@ class LetnjaLigaApp:
         fouls_frame = tk.Frame(match_window, bg="#34495e")
         fouls_frame.grid(row=8, column=0, columnspan=2, pady=10)
 
-        self.team1_foul_button = tk.Button(fouls_frame, text="Faul tim 1", command=lambda: self.add_foul(1),state="disabled", **timer_button_style)
+        self.team1_foul_button = tk.Button(fouls_frame, text="Faul tim 1", command=lambda: self.add_foul(1),state="disabled", **small_button_style)
         self.team1_foul_button.pack(side=tk.LEFT, padx=(20, 10), pady=10)
 
-        self.team2_foul_button = tk.Button(fouls_frame, text="Faul tim 2", command=lambda: self.add_foul(2),state="disabled", **timer_button_style)
+        self.team2_foul_button = tk.Button(fouls_frame, text="Faul tim 2", command=lambda: self.add_foul(2),state="disabled", **small_button_style)
         self.team2_foul_button.pack(side=tk.LEFT, padx=(10, 10), pady=10)
 
-        self.reset_fouls_button = tk.Button(fouls_frame, text="Reset faul", command=self.reset_fouls,state="disabled", **timer_button_style)
+        self.reset_fouls_button = tk.Button(fouls_frame, text="Reset faul", command=self.reset_fouls,state="disabled", **small_button_style)
         self.reset_fouls_button.pack(side=tk.LEFT, padx=(10, 20), pady=10)
 
         # Inicijalizacija faulova
@@ -171,22 +171,30 @@ class LetnjaLigaApp:
         self.end_match_button = tk.Button(match_window, text="Kraj utakmice", state="disabled", command=lambda: self.end_match(match_window), **button_style)
         self.end_match_button.grid(row=7, column=0, columnspan=2, pady=10)
 
+        timeout_frame = tk.Frame(match_window, bg="#34495e")
+        timeout_frame.grid(row=9, column=0, columnspan=2)
+
+        self.timeout_button = tk.Button(timeout_frame, text="Timeout", command=self.start_timeout,state="disabled", **small_button_style)
+        self.timeout_button.pack(side=tk.LEFT, padx=(20, 10), pady=10)
+
+        self.halftime_button = tk.Button(timeout_frame, text="Poluvreme", command=self.start_halftime,state="disabled", **small_button_style)
+        self.halftime_button.pack(side=tk.LEFT, padx=(10, 20), pady=10)
+
         timer_frame = tk.Frame(match_window, bg="#34495e")
-        timer_frame.grid(row=9, column=0, columnspan=2, pady=10)
+        timer_frame.grid(row=10, column=0, columnspan=2, pady=10)
 
 
-
-        self.start_timer_button = tk.Button(timer_frame, text="Start", command=self.start_timer, state="disabled", **timer_button_style)
+        self.start_timer_button = tk.Button(timer_frame, text="Start", command=self.start_timer, state="disabled", **small_button_style)
         self.start_timer_button.pack(side=tk.LEFT, padx=(20, 10), pady=10)
 
-        self.pause_timer_button = tk.Button(timer_frame, text="Pause", command=self.pause_timer, state="disabled", **timer_button_style)
+        self.pause_timer_button = tk.Button(timer_frame, text="Pauza", command=self.pause_timer, state="disabled", **small_button_style)
         self.pause_timer_button.pack(side=tk.LEFT, padx=(10, 10), pady=10)
 
-        self.set_time_button = tk.Button(timer_frame, text="Set time", command=self.set_time, state="disabled", **timer_button_style)
+        self.set_time_button = tk.Button(timer_frame, text="Set vreme", command=self.set_time, state="disabled", **small_button_style)
         self.set_time_button.pack(side=tk.LEFT, padx=(10, 20), pady=10)
 
         self.timer_label_on_match_window = tk.Label(match_window, text="00:00", bg="#34495e", fg="white", font=("Arial", 50, "bold"))
-        self.timer_label_on_match_window.grid(row=10, column=0, columnspan=2, pady=5)
+        self.timer_label_on_match_window.grid(row=11, column=0, columnspan=2, pady=5)
 
     def on_window_close(self,window):
         self.root.deiconify()
@@ -205,6 +213,8 @@ class LetnjaLigaApp:
             self.team1_foul_button.config(state=tk.NORMAL)
             self.team2_foul_button.config(state=tk.NORMAL)
             self.reset_fouls_button.config(state=tk.NORMAL)
+            self.timeout_button.config(state=tk.NORMAL)
+            self.halftime_button.config(state=tk.NORMAL)
             
             self.time_left = tk.IntVar()
             self.time_left.set(0)
@@ -269,7 +279,7 @@ class LetnjaLigaApp:
         else:
             messagebox.showerror("Greška", "Morate izabrati oba tima pre početka utakmice.")
 
-    def load_players(self,select,listbox):
+    def load_players(self,window,select,listbox):
         team = select.get()
         listbox.delete(0,tk.END)
         for player in self.teams[team]:
@@ -590,6 +600,7 @@ class LetnjaLigaApp:
         tk.Label(self.time_input_window, text="Minuti:", bg="#34495e", fg="white", font=("Helvetica", 12)).pack(pady=5)
         self.minutes_entry = tk.Entry(self.time_input_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12))
         self.minutes_entry.pack(pady=5)
+        self.minutes_entry.insert(0,"0")
         tk.Label(self.time_input_window, text="Sekunde:", bg="#34495e", fg="white", font=("Helvetica", 12)).pack(pady=5)
         self.seconds_entry = tk.Entry(self.time_input_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12))
         self.seconds_entry.pack(pady=5)
@@ -629,6 +640,44 @@ class LetnjaLigaApp:
         minutes, seconds = divmod(self.time_left.get(), 60)
         self.timer_label.config(text=f"{minutes:02}:{seconds:02}")
         self.timer_label_on_match_window.config(text=f"{minutes:02}:{seconds:02}")
+
+    def start_timeout(self):
+        self.pause_timer()
+        self.start_timer_button.config(state=tk.DISABLED)
+        self.timeout_time_left = 60  # 60 seconds for timeout
+        self.update_timeout_timer()
+
+    def update_timeout_timer(self):
+        if self.timeout_time_left > 0:
+            mins, secs = divmod(self.timeout_time_left, 60)
+            time_format = f'{mins:02d}:{secs:02d}'
+            self.timer_label_on_match_window.config(text=time_format)
+            self.timer_label.config(text=time_format)
+            self.timeout_time_left -= 1
+            self.timer_window.after(1000, self.update_timeout_timer)
+        else:
+            self.start_timer_button.config(state=tk.NORMAL)
+            self.start_timer()
+            self.pause_timer()
+
+    def start_halftime(self):
+        self.pause_timer()
+        self.start_timer_button.config(state=tk.DISABLED)
+        self.halftime_time_left = 120  # 2 minutes for halftime
+        self.update_halftime_timer()
+
+    def update_halftime_timer(self):
+        if self.halftime_time_left > 0:
+            mins, secs = divmod(self.halftime_time_left, 60)
+            time_format = f'{mins:02d}:{secs:02d}'
+            self.timer_label_on_match_window.config(text=time_format)
+            self.timer_label.config(text=time_format)
+            self.halftime_time_left -= 1
+            self.timer_window.after(1000, self.update_halftime_timer)
+        else:
+            self.start_timer_button.config(state=tk.NORMAL)
+            self.start_timer()
+            self.pause_timer()
 
     def add_foul(self, team):
         """
