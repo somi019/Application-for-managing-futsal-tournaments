@@ -644,6 +644,7 @@ class LetnjaLigaApp:
     def start_timeout(self):
         self.pause_timer()
         self.start_timer_button.config(state=tk.DISABLED)
+        self.set_time_button.config(state=tk.DISABLED)
         self.timeout_time_left = 60  # 60 seconds for timeout
         self.update_timeout_timer()
 
@@ -657,12 +658,14 @@ class LetnjaLigaApp:
             self.timer_window.after(1000, self.update_timeout_timer)
         else:
             self.start_timer_button.config(state=tk.NORMAL)
+            self.set_time_button.config(state=tk.NORMAL)
             self.start_timer()
             self.pause_timer()
 
     def start_halftime(self):
         self.pause_timer()
         self.start_timer_button.config(state=tk.DISABLED)
+        self.set_time_button.config(state=tk.DISABLED)
         self.halftime_time_left = 120  # 2 minutes for halftime
         self.update_halftime_timer()
 
@@ -676,6 +679,7 @@ class LetnjaLigaApp:
             self.timer_window.after(1000, self.update_halftime_timer)
         else:
             self.start_timer_button.config(state=tk.NORMAL)
+            self.set_time_button.config(state=tk.NORMAL)
             self.start_timer()
             self.pause_timer()
 
