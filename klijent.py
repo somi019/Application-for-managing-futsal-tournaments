@@ -23,7 +23,7 @@ class LetnjaLigaApp:
         screen_width = window.winfo_screenwidth()
         screen_height = window.winfo_screenheight()
         x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
+        y = (screen_height // 2) - (height // 2) - 50
         window.geometry(f'{width}x{height}+{x}+{y}')
     
     def create_main_widgets(self):
@@ -45,7 +45,7 @@ class LetnjaLigaApp:
             "highlightthickness": 0
         }
 
-        self.match_button = tk.Button(self.root, text="Utakmica", command=self.start_match, **button_style)
+        self.match_button = tk.Button(self.root, text="Utakmica", command=self.match, **button_style)
         self.match_button.pack(pady=10)
 
         self.add_team_button = tk.Button(self.root, text="Dodaj ekipu", command=self.add_team, **button_style)
@@ -63,11 +63,10 @@ class LetnjaLigaApp:
         self.exit_button = tk.Button(self.root, text="Izlaz", command=self.root.quit, **button_style)
         self.exit_button.pack(pady=10)
 
-
-    def start_match(self):
+    def match(self):
         match_window = tk.Toplevel(self.root)
         match_window.title("Utakmica")
-        self.center_window(match_window,450, 850)
+        self.center_window(match_window, 450, 920)
         match_window.configure(bg="#34495e")
 
         self.root.withdraw()
@@ -77,21 +76,21 @@ class LetnjaLigaApp:
 
         self.team1_label = tk.Label(match_window, text="Tim 1", **label_style)
         self.team1_label.grid(row=0, column=0, padx=20, pady=5, sticky='w')
-        
+
         self.team1_select = ttk.Combobox(match_window, values=list(self.teams.keys()))
         self.team1_select.grid(row=1, column=0, padx=20, pady=5, sticky='w')
         self.team1_select.bind("<<ComboboxSelected>>", lambda _: self.load_players(match_window, self.team1_select, self.team1_players))
-        
+
         self.team1_players = tk.Listbox(match_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=15)
         self.team1_players.grid(row=2, column=0, padx=20, pady=5, sticky='w')
 
         self.team2_label = tk.Label(match_window, text="Tim 2", **label_style)
         self.team2_label.grid(row=0, column=1, padx=20, pady=5, sticky='e')
-        
+
         self.team2_select = ttk.Combobox(match_window, values=list(self.teams.keys()))
         self.team2_select.grid(row=1, column=1, padx=20, pady=5, sticky='e')
         self.team2_select.bind("<<ComboboxSelected>>", lambda _: self.load_players(match_window, self.team2_select, self.team2_players))
-        
+
         self.team2_players = tk.Listbox(match_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 12), height=15)
         self.team2_players.grid(row=2, column=1, padx=20, pady=5, sticky='e')
 
@@ -109,7 +108,7 @@ class LetnjaLigaApp:
 
         self.team2_score_label = tk.Label(score_frame, text="0", font=("Arial", 30), bg="#34495e", fg="white")
         self.team2_score_label.pack(side=tk.LEFT, padx=5)
-        
+
         self.strelciUtakmice = {}
 
         button_style = {
@@ -134,12 +133,6 @@ class LetnjaLigaApp:
         self.own_goal_check = tk.Checkbutton(match_window, text="Autogol", variable=self.own_goal_var, bg="#34495e", fg="white", font=("Helvetica", 14), selectcolor="#1abc9c", activebackground="#34495e", activeforeground="white")
         self.own_goal_check.grid(row=6, column=0, columnspan=2, pady=10)
 
-        self.end_match_button = tk.Button(match_window, text="Kraj utakmice", state="disabled", command=lambda: self.end_match(match_window), **button_style)
-        self.end_match_button.grid(row=7, column=0, columnspan=2, pady=10)
-
-        timer_frame = tk.Frame(match_window, bg="#34495e")
-        timer_frame.grid(row=8, column=0, columnspan=2, pady=10)
-
         timer_button_style = {
             "font": ("Helvetica", 12),
             "bg": "#1abc9c",
@@ -151,17 +144,49 @@ class LetnjaLigaApp:
             "width": 8
         }
 
-        self.start_timer_button = tk.Button(timer_frame, text="Start", command=self.start_timer,state="disabled", **timer_button_style)
+        # Frame za faulove
+        fouls_frame = tk.Frame(match_window, bg="#34495e")
+        fouls_frame.grid(row=8, column=0, columnspan=2, pady=10)
+
+        self.team1_foul_button = tk.Button(fouls_frame, text="Faul tim 1", command=lambda: self.add_foul(1),state="disabled", **timer_button_style)
+        self.team1_foul_button.pack(side=tk.LEFT, padx=(20, 10), pady=10)
+
+        self.team2_foul_button = tk.Button(fouls_frame, text="Faul tim 2", command=lambda: self.add_foul(2),state="disabled", **timer_button_style)
+        self.team2_foul_button.pack(side=tk.LEFT, padx=(10, 10), pady=10)
+
+        self.reset_fouls_button = tk.Button(fouls_frame, text="Reset faul", command=self.reset_fouls,state="disabled", **timer_button_style)
+        self.reset_fouls_button.pack(side=tk.LEFT, padx=(10, 20), pady=10)
+
+        # Inicijalizacija faulova
+        self.team1_fouls = 0
+        self.team2_fouls = 0
+
+        # Labeli za faulove
+        self.team1_fouls_label = tk.Label(match_window, text="Faulovi: 0", **label_style)
+        self.team1_fouls_label.grid(row=0, column=0, padx=20, pady=(20, 10), sticky='e')
+
+        self.team2_fouls_label = tk.Label(match_window, text="Faulovi: 0", **label_style)
+        self.team2_fouls_label.grid(row=0, column=1, padx=20, pady=(20, 10), sticky='w')
+
+        self.end_match_button = tk.Button(match_window, text="Kraj utakmice", state="disabled", command=lambda: self.end_match(match_window), **button_style)
+        self.end_match_button.grid(row=7, column=0, columnspan=2, pady=10)
+
+        timer_frame = tk.Frame(match_window, bg="#34495e")
+        timer_frame.grid(row=9, column=0, columnspan=2, pady=10)
+
+
+
+        self.start_timer_button = tk.Button(timer_frame, text="Start", command=self.start_timer, state="disabled", **timer_button_style)
         self.start_timer_button.pack(side=tk.LEFT, padx=(20, 10), pady=10)
 
-        self.pause_timer_button = tk.Button(timer_frame, text="Pause", command=self.pause_timer,state="disabled", **timer_button_style)
+        self.pause_timer_button = tk.Button(timer_frame, text="Pause", command=self.pause_timer, state="disabled", **timer_button_style)
         self.pause_timer_button.pack(side=tk.LEFT, padx=(10, 10), pady=10)
 
-        self.set_time_button = tk.Button(timer_frame, text="Set time", command=self.set_time,state="disabled", **timer_button_style)
+        self.set_time_button = tk.Button(timer_frame, text="Set time", command=self.set_time, state="disabled", **timer_button_style)
         self.set_time_button.pack(side=tk.LEFT, padx=(10, 20), pady=10)
 
-        self.timer_label_on_match_window = tk.Label(match_window,text="00:00", bg="#34495e", fg="white", font=("Arial", 50, "bold"))
-        self.timer_label_on_match_window.grid(row=9, column=0, columnspan=2, pady=5)
+        self.timer_label_on_match_window = tk.Label(match_window, text="00:00", bg="#34495e", fg="white", font=("Arial", 50, "bold"))
+        self.timer_label_on_match_window.grid(row=10, column=0, columnspan=2, pady=5)
 
     def on_window_close(self,window):
         self.root.deiconify()
@@ -177,6 +202,9 @@ class LetnjaLigaApp:
             self.start_timer_button.config(state=tk.NORMAL)
             self.pause_timer_button.config(state=tk.NORMAL)
             self.set_time_button.config(state=tk.NORMAL)
+            self.team1_foul_button.config(state=tk.NORMAL)
+            self.team2_foul_button.config(state=tk.NORMAL)
+            self.reset_fouls_button.config(state=tk.NORMAL)
             
             self.time_left = tk.IntVar()
             self.time_left.set(0)
@@ -201,13 +229,22 @@ class LetnjaLigaApp:
             team_result_frame = tk.Frame(main_frame, bg="#34495e")
             team_result_frame.pack()
 
+            # Label za faulove tima 1
+            self.team1_fouls_label_semaphore = tk.Label(team_result_frame, text="0", bg="#34495e", fg="red", font=("Arial", 80, "bold"))
+            self.team1_fouls_label_semaphore.grid(row=0, column=0, padx=(50, 20), pady=(20, 10))
+
             # Ime tima 1
             self.team1_name_label = tk.Label(team_result_frame, text=self.team1_select.get(), bg="#34495e", fg="white", font=("Arial", 80, "bold"))
-            self.team1_name_label.grid(row=0, column=0, padx=50, pady=(20, 10))
+            self.team1_name_label.grid(row=0, column=1, padx=20, pady=(20, 10))
 
             # Ime tima 2
             self.team2_name_label = tk.Label(team_result_frame, text=self.team2_select.get(), bg="#34495e", fg="white", font=("Arial", 80, "bold"))
-            self.team2_name_label.grid(row=0, column=1, padx=50, pady=(20, 10))
+            self.team2_name_label.grid(row=0, column=2, padx=20, pady=(20, 10))
+
+            # Label za faulove tima 2
+            self.team2_fouls_label_semaphore = tk.Label(team_result_frame, text="0", bg="#34495e", fg="red", font=("Arial", 80, "bold"))
+            self.team2_fouls_label_semaphore.grid(row=0, column=3, padx=(20, 50), pady=(20, 10))
+
 
             # Razmak između imena i rezultata
             spacer_label = tk.Label(team_result_frame, text="", bg="#34495e")
@@ -215,7 +252,7 @@ class LetnjaLigaApp:
 
             # Rezultati
             result_frame = tk.Frame(team_result_frame, bg="#34495e", bd=10, relief=tk.RIDGE)
-            result_frame.grid(row=2, column=0, columnspan=2, pady=(10, 0))
+            result_frame.grid(row=2, column=0, columnspan=4, pady=(10, 0))
 
             self.team1_result_label = tk.Label(result_frame, text="0", bg="#34495e", fg="white", font=label_font)
             self.team1_result_label.pack(side=tk.LEFT, padx=50)
@@ -232,12 +269,12 @@ class LetnjaLigaApp:
         else:
             messagebox.showerror("Greška", "Morate izabrati oba tima pre početka utakmice.")
 
-
-    def load_players(self,window,select,listbox):
+    def load_players(self,select,listbox):
         team = select.get()
         listbox.delete(0,tk.END)
         for player in self.teams[team]:
             listbox.insert(tk.END,player)
+
     def add_goal(self):
         selected_team1 = self.team1_players.curselection()
         selected_team2 = self.team2_players.curselection()
@@ -268,6 +305,7 @@ class LetnjaLigaApp:
                 self.team1_score += 1
                 self.team1_score_label.config(text=str(self.team1_score))
                 self.team1_result_label.config(text=str(self.team1_score))
+                self.own_goal_check.deselect()
                 selected_player += " (A)"
             else:
                 self.team2_score +=1
@@ -300,7 +338,6 @@ class LetnjaLigaApp:
         
         with open("strelci.json",'w') as file:
             json.dump(scorers,file)
-
 
     def end_match(self,match_window):
         if messagebox.askyesno("Kraj utakmice?","Da li ste sigurni?"):
@@ -386,7 +423,6 @@ class LetnjaLigaApp:
             team_name_entry.delete(0,tk.END)
         else:
             messagebox.showerror("Greska","Neispravan naziv ekipe ili ekipa vec postoji")
-    
         
     def add_player(self):
         add_player_window = tk.Toplevel(self.root)
@@ -535,7 +571,6 @@ class LetnjaLigaApp:
             scorer_strings = map(lambda scorer: f"Igrac: {scorer}, broj golova: {self.strelciUtakmice[scorer]}\n",self.strelciUtakmice)
             log_file.writelines(scorer_strings)
 
-
     def start_timer(self):
         if not hasattr(self, 'timer_running'):
             self.timer_running = False
@@ -594,6 +629,29 @@ class LetnjaLigaApp:
         minutes, seconds = divmod(self.time_left.get(), 60)
         self.timer_label.config(text=f"{minutes:02}:{seconds:02}")
         self.timer_label_on_match_window.config(text=f"{minutes:02}:{seconds:02}")
+
+    def add_foul(self, team):
+        """
+        Dodaje faul za odabrani tim.
+        :param team: 1 za Tim 1, 2 za Tim 2
+        """
+        if team == 1:
+            self.team1_fouls += 1
+            self.team1_fouls_label.config(text=f"Faulovi: {self.team1_fouls}")
+            self.team1_fouls_label_semaphore.config(text=f"{self.team1_fouls}")
+        elif team == 2:
+            self.team2_fouls += 1
+            self.team2_fouls_label.config(text=f"Faulovi: {self.team2_fouls}")
+            self.team2_fouls_label_semaphore.config(text=f"{self.team2_fouls}")
+
+    def reset_fouls(self):
+        """Resetuje broj faulova za oba tima."""
+        self.team1_fouls = 0
+        self.team2_fouls = 0
+        self.team1_fouls_label.config(text="Faulovi: 0")
+        self.team2_fouls_label.config(text="Faulovi: 0")
+        self.team1_fouls_label_semaphore.config(text="0")
+        self.team2_fouls_label_semaphore.config(text="0")
 
     def toggle_full_screen(self,event=None):
         self.full_screen = not self.full_screen
