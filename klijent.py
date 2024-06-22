@@ -14,7 +14,6 @@ class LetnjaLigaApp:
         self.center_window(root,400,500)
         self.create_main_widgets()
 
-        
     def load_teams(self):
         with open('timovi.json','r') as file:
             return json.load(file)
@@ -586,10 +585,15 @@ class LetnjaLigaApp:
             self.timer_running = False
         if not self.timer_running:
             self.timer_running = True
+            self.pause_timer_button.config(state=tk.NORMAL)
+            self.start_timer_button.config(state=tk.DISABLED)
             self.update_timer()
 
     def pause_timer(self):
         self.timer_running = False
+        self.pause_timer_button.config(state=tk.DISABLED)
+        self.start_timer_button.config(state=tk.NORMAL)
+        time.sleep(1)
 
     def set_time(self):
         self.time_input_window = tk.Toplevel(self.root)
@@ -624,11 +628,15 @@ class LetnjaLigaApp:
         seconds = int(self.seconds_entry.get())
         self.time_left.set(minutes * 60 + seconds)
         self.update_timer_label()
+        self.pause_timer()
         self.time_input_window.destroy()
 
     def update_timer(self):
         if self.timer_running and self.time_left.get() > 0:
-            self.update_timer_label()
+            try:
+                self.update_timer_label()
+            except:
+                self.timer_window.destroy()
             self.time_left.set(self.time_left.get() - 1)
             self.timer_window.after(1000, self.update_timer)
         elif self.time_left.get() == 0:
