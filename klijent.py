@@ -593,6 +593,7 @@ class LetnjaLigaApp:
         self.timer_running = False
         self.pause_timer_button.config(state=tk.DISABLED)
         self.start_timer_button.config(state=tk.NORMAL)
+        self.time_left.set(self.time_left.get()+1)
         time.sleep(1)
 
     def set_time(self):
@@ -628,7 +629,9 @@ class LetnjaLigaApp:
         seconds = int(self.seconds_entry.get())
         self.time_left.set(minutes * 60 + seconds)
         self.update_timer_label()
-        self.pause_timer()
+        self.timer_running = False
+        self.pause_timer_button.config(state=tk.DISABLED)
+        self.start_timer_button.config(state=tk.NORMAL)
         self.time_input_window.destroy()
 
     def update_timer(self):
