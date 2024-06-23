@@ -7,7 +7,6 @@ import os
 from functools import reduce
 
 
-#  encode utf 8 i decode utf 8 kako vec treba da se uradi nece da radi bez toga
 class LetnjaLigaApp:
     def __init__(self,root):
         self.root = root
@@ -222,7 +221,7 @@ class LetnjaLigaApp:
 
             self.timer_window = tk.Toplevel(self.root)
             self.timer_window.title("Timer i Rezultat")
-            self.center_window(self.timer_window, 1920, 1080)  # Prilagodite dimenzije prozora prema potrebi
+            self.center_window(self.timer_window, 1800, 1080)  # Prilagodite dimenzije prozora prema potrebi
             self.timer_window.configure(bg="#34495e")
 
             label_font = ("Arial Greek", 250, "bold")
@@ -260,9 +259,13 @@ class LetnjaLigaApp:
             spacer_label = tk.Label(team_result_frame, text="", bg="#34495e")
             spacer_label.grid(row=1, column=0, columnspan=2)
 
+            # Frame za rezultate i strelce
+            scorers_result_frame = tk.Frame(main_frame, bg="#34495e")
+            scorers_result_frame.pack()
+
             # Rezultati
-            result_frame = tk.Frame(team_result_frame, bg="#34495e", bd=10, relief=tk.RIDGE)
-            result_frame.grid(row=2, column=0, columnspan=4, pady=(10, 0))
+            result_frame = tk.Frame(scorers_result_frame, bg="#34495e", bd=10, relief=tk.RIDGE, width=300)  # Fiksna širina za result_frame
+            result_frame.grid(row=0, column=1, pady=(10, 0))
 
             self.team1_result_label = tk.Label(result_frame, text="0", bg="#34495e", fg="white", font=label_font)
             self.team1_result_label.pack(side=tk.LEFT, padx=50)
@@ -272,6 +275,20 @@ class LetnjaLigaApp:
 
             self.team2_result_label = tk.Label(result_frame, text="0", bg="#34495e", fg="white", font=label_font)
             self.team2_result_label.pack(side=tk.LEFT, padx=50)
+
+            # Strelci za tim 1
+            team1_scorers_frame = tk.Frame(scorers_result_frame, bg="#34495e", width=200, height=500)  # Fiksne dimenzije za team1_scorers_frame
+            team1_scorers_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky='n')
+
+            self.team1_scorers_label = tk.Label(team1_scorers_frame, text="", bg="#34495e", fg="white", font=("Arial", 30, "bold"), justify=tk.RIGHT, width=15)
+            self.team1_scorers_label.pack(fill=tk.BOTH, expand=True)
+
+            # Strelci za tim 2
+            team2_scorers_frame = tk.Frame(scorers_result_frame, bg="#34495e", width=200, height=500)  # Fiksne dimenzije za team2_scorers_frame
+            team2_scorers_frame.grid(row=0, column=2, padx=20, pady=(20, 10), sticky='n')
+
+            self.team2_scorers_label = tk.Label(team2_scorers_frame, text="", bg="#34495e", fg="white", font=("Arial", 30, "bold"), justify=tk.LEFT, width=15)
+            self.team2_scorers_label.pack(fill=tk.BOTH, expand=True)
 
             self.timer_window.bind("<F12>",self.toggle_full_screen)
 
@@ -308,7 +325,7 @@ class LetnjaLigaApp:
                 self.strelciUtakmice[selected_player] += 1
             else:
                 self.strelciUtakmice[selected_player] = 1
-
+            self.update_scorers_labels()
         elif selected_team2:
             selected_player = self.team2_players.get(selected_team2)
             if self.own_goal_var.get():
@@ -326,10 +343,11 @@ class LetnjaLigaApp:
                 self.strelciUtakmice[selected_player] += 1
             else:
                 self.strelciUtakmice[selected_player] = 1
+            self.update_scorers_labels()
         else:
             messagebox.showerror("Greska","Morate izabrati igraca koji je postigao gol")
-
-    def add_scorers(self,match_scorers):
+        
+    def save_scorers(self,match_scorers):
         try:
             with open('strelci.json','r') as file:
                 scorers = json.load(file)
@@ -349,6 +367,13 @@ class LetnjaLigaApp:
         with open("strelci.json",'w') as file:
             json.dump(scorers,file)
 
+    def update_scorers_labels(self):
+        team1_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player in self.teams[self.team1_select.get()])
+        self.team1_scorers_label.config(text=team1_scorers_text)
+
+        team2_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player in self.teams[self.team2_select.get()])
+        self.team2_scorers_label.config(text=team2_scorers_text)
+
     def end_match(self,match_window):
         if messagebox.askyesno("Kraj utakmice?","Da li ste sigurni?"):
             current_time = time.strftime("%d.%m.%Y %H:%M:%S")
@@ -361,7 +386,7 @@ class LetnjaLigaApp:
                 "tim2" : self.team2_select.get(),
                 "rezultat" : f"{self.team1_score} : {self.team2_score}"
             }
-            self.add_scorers(self.strelciUtakmice)
+            self.save_scorers(self.strelciUtakmice)
             self.send_match_data(match_data)
             self.log_match(match_data)
             self.on_window_close(match_window)
@@ -624,8 +649,9 @@ class LetnjaLigaApp:
         }
 
         tk.Button(self.time_input_window, text="Postavi", command=self.apply_set_time, **button_style).pack(pady=5)
+        self.time_input_window.bind("<Return>",self.apply_set_time)
 
-    def apply_set_time(self):
+    def apply_set_time(self,event = None):
         minutes = int(self.minutes_entry.get())
         seconds = int(self.seconds_entry.get())
         self.time_left.set(minutes * 60 + seconds)
@@ -667,8 +693,11 @@ class LetnjaLigaApp:
         if self.timeout_time_left > 0:
             mins, secs = divmod(self.timeout_time_left, 60)
             time_format = f'{mins:02d}:{secs:02d}'
-            self.timer_label_on_match_window.config(text=time_format)
-            self.timer_label.config(text=time_format)
+            try:
+                self.timer_label_on_match_window.config(text=time_format)
+                self.timer_label.config(text=time_format)
+            except:
+                self.timer_window.destroy()
             self.timeout_time_left -= 1
             self.timer_window.after(1000, self.update_timeout_timer)
         else:
@@ -694,8 +723,11 @@ class LetnjaLigaApp:
         if self.halftime_time_left > 0:
             mins, secs = divmod(self.halftime_time_left, 60)
             time_format = f'{mins:02d}:{secs:02d}'
-            self.timer_label_on_match_window.config(text=time_format)
-            self.timer_label.config(text=time_format)
+            try:
+                self.timer_label_on_match_window.config(text=time_format)
+                self.timer_label.config(text=time_format)
+            except:
+                self.timer_window.destroy()
             self.halftime_time_left -= 1
             self.timer_window.after(1000, self.update_halftime_timer)
         else:
