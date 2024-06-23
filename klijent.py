@@ -7,6 +7,7 @@ import os
 from functools import reduce
 
 
+#  encode utf 8 i decode utf 8 kako vec treba da se uradi nece da radi bez toga
 class LetnjaLigaApp:
     def __init__(self,root):
         self.root = root
@@ -497,7 +498,7 @@ class LetnjaLigaApp:
     def show_results(self):
         results_window = tk.Toplevel(self.root)
         results_window.title("Rezultati")
-        self.center_window(results_window, 600, 700)
+        self.center_window(results_window, 1000, 900)
         results_window.configure(bg="#34495e")
         
         results_text = tk.Text(results_window, bg="#ecf0f1", fg="#2c3e50", font=("Helvetica", 15))
@@ -571,7 +572,7 @@ class LetnjaLigaApp:
         self.ensure_logs_directory_exists()
 
         log_filename = f"utakmice_logs/{match_data['datum']}_{match_data['vreme'].replace(':','.')}_{match_data['tim1']}-{match_data['tim2']}.txt"
-        with open(log_filename,"w") as log_file:
+        with open(log_filename,"w",encoding="utf-8") as log_file:
             log_file.write(f"Datum:{match_data['datum']}\n")
             log_file.write(f"Vreme:{match_data['vreme']}\n")
             log_file.write(f"Timovi:{match_data['tim1']} - {match_data['tim2']}\n")
