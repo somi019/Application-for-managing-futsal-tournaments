@@ -635,7 +635,8 @@ class LetnjaLigaApp:
         self.timer_running = False
         self.pause_timer_button.config(state=tk.DISABLED)
         self.start_timer_button.config(state=tk.NORMAL)
-        self.time_left.set(self.time_left.get()+1)
+        if self.time_left.get() > 0:
+            self.time_left.set(self.time_left.get()+1)
         time.sleep(1)
 
     def set_time(self):
