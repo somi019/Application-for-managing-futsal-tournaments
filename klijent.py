@@ -314,7 +314,7 @@ class LetnjaLigaApp:
                 self.team2_score_label.config(text=str(self.team2_score))
                 self.team2_result_label.config(text=str(self.team2_score))
                 self.own_goal_check.deselect()
-                selected_player += " (A)"
+                selected_player += "(A)"
             else:
                 self.team1_score +=1
                 self.team1_score_label.config(text=f"{self.team1_score}")
@@ -333,7 +333,7 @@ class LetnjaLigaApp:
                 self.team1_score_label.config(text=str(self.team1_score))
                 self.team1_result_label.config(text=str(self.team1_score))
                 self.own_goal_check.deselect()
-                selected_player += " (A)"
+                selected_player += "(A)"
             else:
                 self.team2_score +=1
                 self.team2_score_label.config(text=f"{self.team2_score}")
@@ -368,10 +368,10 @@ class LetnjaLigaApp:
             json.dump(scorers,file)
 
     def update_scorers_labels(self):
-        team1_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player in self.teams[self.team1_select.get()])
+        team1_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player.split("(")[0] in self.teams[self.team1_select.get()])
         self.team1_scorers_label.config(text=team1_scorers_text)
 
-        team2_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player in self.teams[self.team2_select.get()])
+        team2_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player.split("(")[0] in self.teams[self.team2_select.get()])
         self.team2_scorers_label.config(text=team2_scorers_text)
 
     def end_match(self,match_window):
