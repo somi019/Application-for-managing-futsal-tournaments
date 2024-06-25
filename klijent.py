@@ -368,11 +368,27 @@ class LetnjaLigaApp:
             json.dump(scorers,file)
 
     def update_scorers_labels(self):
-        team1_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player.split("(")[0] in self.teams[self.team1_select.get()])
+
+        team1_scorers_text = "\n".join(
+            f"{player[0]}. {player.split(' ')[-1]}({goals})"
+            for player, goals in self.strelciUtakmice.items()
+            if self.is_player_in_team(player, self.teams[self.team1_select.get()]) or self.is_player_in_team(player, self.teams[self.team2_select.get()], is_own_goal=True)
+        )
         self.team1_scorers_label.config(text=team1_scorers_text)
 
-        team2_scorers_text = "\n".join(f"{player[0]}. {player.split(' ')[-1]}({goals})" for player, goals in self.strelciUtakmice.items() if player.split("(")[0] in self.teams[self.team2_select.get()])
+        team2_scorers_text = "\n".join(
+            f"{player[0]}. {player.split(' ')[-1]}({goals})"
+            for player, goals in self.strelciUtakmice.items()
+            if self.is_player_in_team(player, self.teams[self.team2_select.get()]) or self.is_player_in_team(player, self.teams[self.team1_select.get()], is_own_goal=True)
+        )
         self.team2_scorers_label.config(text=team2_scorers_text)
+    
+    def is_player_in_team(self,player, team, is_own_goal=False):
+        player_name = player.split("(")[0].strip()
+        if is_own_goal:
+            return "(A)" in player and player_name in team
+        else:
+            return player_name in team and "(A)" not in player
 
     def end_match(self,match_window):
         if messagebox.askyesno("Kraj utakmice?","Da li ste sigurni?"):
